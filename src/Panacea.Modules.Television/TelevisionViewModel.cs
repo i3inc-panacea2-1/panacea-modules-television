@@ -246,8 +246,13 @@ namespace Panacea.Modules.Television
                 {
                     return;
                 }
-
-                _currentResponse = player.Play(
+                if(_response != null)
+                {
+                    _response.Stopped -= _response_Stopped;
+                    _response.Ended -= _response_Ended;
+                    _response.Error -= _response_Error;
+                }
+                _response = _currentResponse = player.Play(
                     new MediaRequest(c)
                     {
                         MediaPlayerPosition = MediaPlayerPosition.Embedded,
@@ -256,10 +261,30 @@ namespace Panacea.Modules.Television
                         ShowControls = true,
                         MediaTraverser = this
                     });
-
+                _response.Stopped += _response_Stopped;
+                _response.Ended += _response_Ended;
+                _response.Error += _response_Error;
             }
            
         }
+
+        private void _response_Error(object sender, EventArgs e)
+        {
+            _currentChannel = SelectedChannel = null;
+        }
+
+        private void _response_Ended(object sender, EventArgs e)
+        {
+            _currentChannel = SelectedChannel = null;
+
+        }
+
+        private void _response_Stopped(object sender, EventArgs e)
+        {
+            _currentChannel = SelectedChannel = null;
+        }
+
+        IMediaResponse _response;
 
         public RelayCommand FullscreenCommand { get; }
 
