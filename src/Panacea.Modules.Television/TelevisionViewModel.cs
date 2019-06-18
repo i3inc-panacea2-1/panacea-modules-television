@@ -205,7 +205,7 @@ namespace Panacea.Modules.Television
                         {
                             SelectedChannel = _currentChannel;
                         }), DispatcherPriority.Send);
-                        var serv = await billing.GetServiceForItemAsync("Television", "Television", c);
+                        var serv = await billing.GetOrRequestServiceForItemAsync("Television", "Television", c);
                         if (serv != null)
                         {
                             //_webSocket.PopularNotify("Television", "Channel", c.Id);
