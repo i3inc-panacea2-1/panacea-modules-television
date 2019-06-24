@@ -9,7 +9,6 @@
     xmlns:pcontrols="clr-namespace:Panacea.Controls;assembly=Panacea.Controls"
     d:DesignHeight="450"
     d:DesignWidth="800"
-    pcontrols:Material.RelativeFontSizeRatio="1.0"
     Background="White"
     mc:Ignorable="d">
     <Grid>
@@ -33,7 +32,7 @@
                         Name="txtloading"
                         HorizontalAlignment="Center"
                         VerticalAlignment="Center"
-                        pcontrols:Material.RelativeFontSizeRatio="1.2"
+                        FontSize="{DynamicResource FontSize-X-Large}"
                         Foreground="White"
                         Text="{multilinguality:Translate 'Touch a channel to start watching',
                                                          'Television'}" />
