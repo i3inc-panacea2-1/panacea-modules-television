@@ -7,9 +7,9 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:multilinguality="clr-namespace:Panacea.Multilinguality;assembly=Panacea.Multilinguality"
     xmlns:pcontrols="clr-namespace:Panacea.Controls;assembly=Panacea.Controls"
-    d:DesignHeight="450"
-    d:DesignWidth="800"
-    Background="White"
+    d:DesignHeight="768"
+    d:DesignWidth="1366"
+    Background="Black"
     mc:Ignorable="d">
     <Grid>
         <Grid.ColumnDefinitions>
@@ -18,12 +18,7 @@
         </Grid.ColumnDefinitions>
         <Grid>
             <Grid Margin="20,40">
-                <Grid.Effect>
-                    <DropShadowEffect
-                        BlurRadius="6"
-                        ShadowDepth="0"
-                        Color="#11000000" />
-                </Grid.Effect>
+
                 <Grid
                     Grid.Row="0"
                     VerticalAlignment="Stretch"
@@ -50,17 +45,11 @@
                 <RowDefinition Height="2*" />
                 <RowDefinition Height="1*" />
             </Grid.RowDefinitions>
-            <Grid.Effect>
-                <DropShadowEffect
-                    BlurRadius="8"
-                    Opacity=".3"
-                    ShadowDepth="0"
-                    Color="#00000000" />
-            </Grid.Effect>
+
             <ListBox
                 Background="#d9d9d9"
                 BorderBrush="#b9b9b9"
-                BorderThickness="1,0,0,0"
+                BorderThickness="0,0,0,0"
                 ItemsSource="{Binding Channels}"
                 ScrollViewer.CanContentScroll="False"
                 SelectedItem="{Binding SelectedChannel, Mode=TwoWay}"
@@ -153,7 +142,7 @@
                         <TextBlock
                             Padding="10"
                             HorizontalAlignment="Stretch"
-                            FontSize="18"
+                            FontSize="{DynamicResource FontSize-Large}"
                             Text="{Binding Name}" />
 
                     </DataTemplate>
@@ -167,7 +156,7 @@
                         <Setter Property="Background" Value="#58707a" />
                         <Setter Property="BorderThickness" Value="30" />
                         <Setter Property="Margin" Value="5" />
-                        <Setter Property="FontSize" Value="{DynamicResource FontSize-X-Small}" />
+                        <Setter Property="FontSize" Value="{DynamicResource FontSize-Small}" />
                         <Setter Property="pcontrols:RippleEffectDecorator.HighlightBackground" Value="#44ffffff" />
                         <Setter Property="Template">
                             <Setter.Value>
@@ -191,12 +180,14 @@
                                                             Foreground="{TemplateBinding Foreground}"
                                                             Icon="{Binding RelativeSource={RelativeSource TemplatedParent}, Path=(pcontrols:Material.Icon)}" />
                                                     </Viewbox>
-                                                    <Viewbox Grid.Row="1" Margin="10,3">
-                                                        <ContentPresenter
-                                                            Name="PART_Content"
-                                                            HorizontalAlignment="Center"
-                                                            VerticalAlignment="Top" />
-                                                    </Viewbox>
+
+                                                    <ContentPresenter
+                                                        Name="PART_Content"
+                                                        Grid.Row="1"
+                                                        Margin="2"
+                                                        HorizontalAlignment="Center"
+                                                        VerticalAlignment="Top" />
+
                                                 </Grid>
                                             </pcontrols:RippleEffectDecorator>
                                         </Border>
@@ -220,7 +211,7 @@
                         <Setter Property="Background" Value="#58707a" />
                         <Setter Property="BorderThickness" Value="30" />
                         <Setter Property="Margin" Value="5" />
-                        <Setter Property="FontSize" Value="{DynamicResource FontSize-X-Small}" />
+                        <Setter Property="FontSize" Value="{DynamicResource FontSize-Small}" />
                         <Setter Property="pcontrols:RippleEffectDecorator.HighlightBackground" Value="#44ffffff" />
                         <Setter Property="Template">
                             <Setter.Value>
@@ -244,12 +235,13 @@
                                                             Foreground="{TemplateBinding Foreground}"
                                                             Icon="{Binding RelativeSource={RelativeSource TemplatedParent}, Path=(pcontrols:Material.Icon)}" />
                                                     </Viewbox>
-                                                    <Viewbox Grid.Row="1" Margin="10,3">
-                                                        <ContentPresenter
-                                                            Name="PART_Content"
-                                                            HorizontalAlignment="Center"
-                                                            VerticalAlignment="Top" />
-                                                    </Viewbox>
+
+                                                    <ContentPresenter
+                                                        Name="PART_Content"
+                                                        Grid.Row="1"
+                                                        Margin="2"
+                                                        HorizontalAlignment="Center"
+                                                        VerticalAlignment="Top" />
                                                 </Grid>
                                             </pcontrols:RippleEffectDecorator>
                                         </Border>
@@ -271,9 +263,10 @@
                     </Style>
                 </Border.Resources>
                 <Border Background="#d9d9d9">
+
                     <UniformGrid
-                        Margin="80,0"
-                        HorizontalAlignment="Center"
+                        Margin="0,0"
+                        HorizontalAlignment="Stretch"
                         Columns="3">
 
 
@@ -297,6 +290,7 @@
                             Margin="5,5,5,2"
                             Padding="20"
                             pcontrols:Material.Icon="volume_up"
+                            Command="{Binding VolUpCommand}"
                             Content="Vol Up">
                             <Button.Resources>
                                 <Style TargetType="{x:Type Border}">
@@ -339,6 +333,7 @@
                             Margin="5,2,5,5"
                             Padding="20"
                             pcontrols:Material.Icon="volume_down"
+                            Command="{Binding VolDownCommand}"
                             Content="Vol Dwn">
                             <Button.Resources>
                                 <Style TargetType="{x:Type Border}">
@@ -364,7 +359,9 @@
                         <ToggleButton
                             Name="CaptionsButton"
                             pcontrols:Material.Icon="closed_caption"
-                            Content="Captions">
+                            Content="Captions"
+                            IsChecked="{Binding CaptionsEnabled}"
+                            IsEnabled="{Binding HasCaptions}">
                             <ToggleButton.Resources>
                                 <Style TargetType="{x:Type Border}">
                                     <Setter Property="CornerRadius" Value="9" />
@@ -377,12 +374,19 @@
                             Grid.Column="0"
                             Padding="20"
                             pcontrols:Material.Icon="volume_off"
+                            Command="{Binding MuteCommand}"
                             Content="{multilinguality:Translate 'Mute',
-                                                                'Television'}"
-                            Visibility="{Binding ElementName=Main, Path=MuteVisibility}">
+                                                                'Television'}">
                             <Button.Resources>
                                 <Style TargetType="{x:Type Border}">
                                     <Setter Property="CornerRadius" Value="15" />
+                                </Style>
+                                <Style BasedOn="{StaticResource {x:Type Button}}" TargetType="Button">
+                                    <Style.Triggers>
+                                        <Trigger Property="IsEnabled" Value="False">
+                                            <Setter Property="Visibility" Value="Collapsed" />
+                                        </Trigger>
+                                    </Style.Triggers>
                                 </Style>
                             </Button.Resources>
                         </Button>
@@ -392,12 +396,19 @@
                             Padding="20"
                             pcontrols:Material.Icon="volume_off"
                             Background="{DynamicResource ColorError}"
+                            Command="{Binding UnmuteCommand}"
                             Content="{multilinguality:Translate 'Unmute',
-                                                                'Television'}"
-                            Visibility="{Binding ElementName=Main, Path=UnmuteVisibility}">
+                                                                'Television'}">
                             <Button.Resources>
                                 <Style TargetType="{x:Type Border}">
                                     <Setter Property="CornerRadius" Value="15" />
+                                </Style>
+                                <Style BasedOn="{StaticResource {x:Type Button}}" TargetType="Button">
+                                    <Style.Triggers>
+                                        <Trigger Property="IsEnabled" Value="False">
+                                            <Setter Property="Visibility" Value="Collapsed" />
+                                        </Trigger>
+                                    </Style.Triggers>
                                 </Style>
                             </Button.Resources>
                         </Button>

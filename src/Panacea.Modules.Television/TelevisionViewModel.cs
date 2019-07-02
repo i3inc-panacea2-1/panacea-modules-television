@@ -1,5 +1,6 @@
 ﻿using Panacea.Controls;
 using Panacea.Core;
+using Panacea.Modularity.AudioManager;
 using Panacea.Modularity.Billing;
 using Panacea.Modularity.Media;
 using Panacea.Modularity.MediaPlayerContainer;
@@ -33,7 +34,7 @@ namespace Panacea.Modules.Television
             Host = new ContentControl();
             FullscreenCommand = new RelayCommand(args =>
             {
-                if(_core.TryGetMediaPlayerContainer(out IMediaPlayerContainer player))
+                if (_core.TryGetMediaPlayerContainer(out IMediaPlayerContainer player))
                 {
                     player.GoFullscreen();
                 }
@@ -42,17 +43,80 @@ namespace Panacea.Modules.Television
             {
                 if (_core.TryGetMediaPlayerContainer(out IMediaPlayerContainer player))
                 {
-                    player.Next();
+                    _response?.Next();
                 }
             });
             ChannelDownCommand = new RelayCommand(args =>
             {
                 if (_core.TryGetMediaPlayerContainer(out IMediaPlayerContainer player))
                 {
-                    player.Previous();
+                    _response?.Previous();
                 }
             });
+            MuteCommand = new RelayCommand(args =>
+            {
+                if (_core.TryGetAudioManager(out IAudioManager audio))
+                {
+                    _volume = audio.SpeakersVolume;
+                    audio.SpeakersVolume = 0;
+                }
+            },
+            args =>
+            {
+                if (_core.TryGetAudioManager(out IAudioManager audio))
+                {
+                    return audio.SpeakersVolume != 0;
+                }
+                return false;
+            });
+
+            UnmuteCommand = new RelayCommand(args =>
+            {
+                if (_core.TryGetAudioManager(out IAudioManager audio))
+                {
+                    if (_volume <= 0) _volume = 10;
+                    audio.SpeakersVolume = _volume;
+                }
+            },
+            args =>
+            {
+                if (_core.TryGetAudioManager(out IAudioManager audio))
+                {
+                    return audio.SpeakersVolume == 0;
+                }
+                return false;
+            });
+
+            VolDownCommand = new RelayCommand(args =>
+            {
+                if (_core.TryGetAudioManager(out IAudioManager audio))
+                {
+                    audio.SpeakersVolume = RoundBy5Down(audio.SpeakersVolume) - 5;
+                }
+            });
+
+            VolUpCommand = new RelayCommand(args =>
+            {
+                if (_core.TryGetAudioManager(out IAudioManager audio))
+                {
+                    audio.SpeakersVolume = RoundBy5Up(audio.SpeakersVolume) + 5;
+                }
+            });
+            StopCommand = new RelayCommand(args =>
+            {
+                _response.Stop();
+            });
         }
+        int RoundBy5Down(int v)
+        {
+            return (int)(v / 10 * 10.0 + Math.Ceiling(v % 10 / 5.0) * 5);
+        }
+
+        int RoundBy5Up(int v)
+        {
+            return (int)(v / 10 * 10.0 + Math.Floor(v % 10 / 5.0) * 5);
+        }
+        int _volume;
 
         public ContentControl Host { get; set; }
 
@@ -64,6 +128,28 @@ namespace Panacea.Modules.Television
             {
                 _channels = value;
                 OnPropertyChanged();
+            }
+        }
+
+        bool _hasCaptions;
+        public bool HasCaptions
+        {
+            get => _hasCaptions;
+            set
+            {
+                _hasCaptions = value;
+                OnPropertyChanged();
+            }
+        }
+
+        bool _captionsEnabled;
+        public bool CaptionsEnabled
+        {
+            get => _captionsEnabled;
+            set
+            {
+                _captionsEnabled = value;
+                _response?.SetSubtitles(_captionsEnabled);
             }
         }
 
@@ -80,33 +166,12 @@ namespace Panacea.Modules.Television
             }
         }
 
-        bool _powerButtonEnabled;
-        public bool PowerButtonEnabled
-        {
-            get => _powerButtonEnabled;
-            set
-            {
-                _powerButtonEnabled = value;
-                OnPropertyChanged();
-            }
-        }
-
-        bool _muteIsVisible;
-        public bool MuteIsVisible
-        {
-            get => _muteIsVisible;
-            set
-            {
-                _muteIsVisible = value;
-                OnPropertyChanged();
-            }
-        }
 
         public override async void Activate()
         {
-            if(Channels == null)
+            if (Channels == null)
             {
-                if(_core.TryGetUiManager(out IUiManager ui))
+                if (_core.TryGetUiManager(out IUiManager ui))
                 {
                     await ui.DoWhileBusy(async () =>
                     {
@@ -114,7 +179,7 @@ namespace Panacea.Modules.Television
                     });
                 }
             }
-           
+
             if (_defaultChannel != null)
             {
                 SelectedChannel = Channels.First(c => c.Id == _defaultChannel.Id);
@@ -122,7 +187,7 @@ namespace Panacea.Modules.Television
         }
         public override void Deactivate()
         {
-            
+
         }
 
         public void Next()
@@ -153,7 +218,7 @@ namespace Panacea.Modules.Television
             }
             if (!Channels.Any()) return;
             var index = Channels.IndexOf(SelectedChannel);
-            if (index >= 0) return;
+            if (index <= 0) return;
             SetChannel(Channels[--index]);
         }
 
@@ -198,7 +263,7 @@ namespace Panacea.Modules.Television
                 }
                 else
                 {
-                    
+
                     if (_core.TryGetBilling(out IBillingManager billing))
                     {
                         Application.Current.Dispatcher.BeginInvoke(new Action(() =>
@@ -222,11 +287,11 @@ namespace Panacea.Modules.Television
         }
 
         MediaItem _currentChannel;
-        private float _mutedVol;
         private readonly PanaceaServices _core;
 
         private void PlayChannel(MediaItem c, Service serv)
         {
+            HasCaptions = false;
             if (_core.TryGetUiManager(out IUiManager ui) && _core.TryGetMediaPlayerContainer(out IMediaPlayerContainer player))
             {
                 if (ui.CurrentPage != this)
@@ -246,7 +311,7 @@ namespace Panacea.Modules.Television
                 {
                     return;
                 }
-                if(_response != null)
+                if (_response != null)
                 {
                     _response.Stopped -= _response_Stopped;
                     _response.Ended -= _response_Ended;
@@ -258,17 +323,23 @@ namespace Panacea.Modules.Television
                         MediaPlayerPosition = MediaPlayerPosition.Embedded,
                         MediaPlayerHost = Host,
                         AllowPip = true,
-                        ShowControls = true,
+                        ShowControls = false,
                         MediaTraverser = this
                     });
+                _response.HasSubtitlesChanged += _response_HasSubtitlesChanged;
                 _response.Stopped += _response_Stopped;
                 _response.Ended += _response_Ended;
                 _response.Error += _response_Error;
             }
-           
+
         }
 
-        private void _response_Error(object sender, EventArgs e)
+        private void _response_HasSubtitlesChanged(object sender, bool e)
+        {
+            HasCaptions = e;
+        }
+
+        private void _response_Error(object sender, Exception e)
         {
             _currentChannel = SelectedChannel = null;
         }
@@ -291,5 +362,15 @@ namespace Panacea.Modules.Television
         public RelayCommand ChannelUpCommand { get; }
 
         public RelayCommand ChannelDownCommand { get; }
+
+        public RelayCommand VolUpCommand { get; }
+
+        public RelayCommand VolDownCommand { get; }
+
+        public RelayCommand MuteCommand { get; }
+
+        public RelayCommand UnmuteCommand { get; }
+
+        public RelayCommand StopCommand { get; }
     }
 }
