@@ -318,7 +318,8 @@
                             Grid.Column="0"
                             Padding="20"
                             pcontrols:Material.Icon="screen_share"
-                            Content="Cast to TV">
+                            Content="Cast to TV"
+                            Command="{Binding ScreencastCommand}">
                             <Button.Resources>
                                 <Style TargetType="{x:Type Border}">
                                     <Setter Property="CornerRadius" Value="15" />

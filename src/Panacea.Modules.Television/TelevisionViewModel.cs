@@ -15,6 +15,8 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Threading;
+using Panacea.Modularity.ScreenCast;
+using Panacea.Modularity.TerminalPairing;
 
 namespace Panacea.Modules.Television
 {
@@ -105,6 +107,24 @@ namespace Panacea.Modules.Television
             StopCommand = new RelayCommand(args =>
             {
                 _response.Stop();
+            });
+            ScreencastCommand = new RelayCommand(args =>
+            {
+                {
+                    if (_core.TryGetScreenCast(out IScreenCastPlayer screencast))
+                    {
+
+                    }
+                }
+            },
+            args =>
+            {
+                if (_core.TryGetPairing(out IBoundTerminalManager bound))
+                {
+                    return bound.IsBound();
+                    
+                }
+                return false;
             });
         }
         int RoundBy5Down(int v)
@@ -372,5 +392,7 @@ namespace Panacea.Modules.Television
         public RelayCommand UnmuteCommand { get; }
 
         public RelayCommand StopCommand { get; }
+
+        public RelayCommand ScreencastCommand { get; }
     }
 }
