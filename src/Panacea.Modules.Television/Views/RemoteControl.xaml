@@ -1,0 +1,285 @@
+﻿<UserControl
+    x:Class="Panacea.Modules.Television.Views.RemoteControl"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:local="clr-namespace:Panacea.Modules.Television.Views"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:multilinguality="clr-namespace:Panacea.Multilinguality;assembly=Panacea.Multilinguality"
+    xmlns:pcontrols="clr-namespace:Panacea.Controls;assembly=Panacea.Controls"
+    d:DesignHeight="450"
+    d:DesignWidth="800"
+    mc:Ignorable="d">
+    <UserControl.Resources>
+        <Style TargetType="Button">
+            <Setter Property="Foreground" Value="White" />
+            <Setter Property="Background" Value="#58707a" />
+            <Setter Property="BorderThickness" Value="30" />
+            <Setter Property="Margin" Value="5" />
+            <Setter Property="FontSize" Value="{DynamicResource FontSize-Small}" />
+            <Setter Property="pcontrols:RippleEffectDecorator.HighlightBackground" Value="#44ffffff" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Grid>
+                            <Grid.OpacityMask>
+                                <VisualBrush Visual="{Binding ElementName=Border}" />
+                            </Grid.OpacityMask>
+                            <Border Name="Border" Background="{TemplateBinding Background}">
+                                <pcontrols:RippleEffectDecorator>
+
+                                    <Grid>
+                                        <Grid.RowDefinitions>
+                                            <RowDefinition Height="1.6*" />
+                                            <RowDefinition Height="1*" />
+                                        </Grid.RowDefinitions>
+                                        <Viewbox>
+                                            <pcontrols:MaterialIcon
+                                                Margin="0,3,0,0"
+                                                VerticalAlignment="Bottom"
+                                                Foreground="{TemplateBinding Foreground}"
+                                                Icon="{Binding RelativeSource={RelativeSource TemplatedParent}, Path=(pcontrols:Material.Icon)}" />
+                                        </Viewbox>
+
+                                        <ContentPresenter
+                                            Name="PART_Content"
+                                            Grid.Row="1"
+                                            Margin="2"
+                                            HorizontalAlignment="Center"
+                                            VerticalAlignment="Top" />
+
+                                    </Grid>
+                                </pcontrols:RippleEffectDecorator>
+                            </Border>
+                        </Grid>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="Border" Property="Background" Value="#48606a" />
+                            </Trigger>
+
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter TargetName="Border" Property="Opacity" Value=".4" />
+                            </Trigger>
+
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+        <Style TargetType="ToggleButton">
+            <Setter Property="Foreground" Value="White" />
+            <Setter Property="Background" Value="#58707a" />
+            <Setter Property="BorderThickness" Value="30" />
+            <Setter Property="Margin" Value="5" />
+            <Setter Property="FontSize" Value="{DynamicResource FontSize-Small}" />
+            <Setter Property="pcontrols:RippleEffectDecorator.HighlightBackground" Value="#44ffffff" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ToggleButton">
+                        <Grid>
+                            <Grid.OpacityMask>
+                                <VisualBrush Visual="{Binding ElementName=Border}" />
+                            </Grid.OpacityMask>
+                            <Border Name="Border" Background="{TemplateBinding Background}">
+                                <pcontrols:RippleEffectDecorator>
+
+                                    <Grid>
+                                        <Grid.RowDefinitions>
+                                            <RowDefinition Height="1.6*" />
+                                            <RowDefinition Height="1*" />
+                                        </Grid.RowDefinitions>
+                                        <Viewbox>
+                                            <pcontrols:MaterialIcon
+                                                Margin="0,3,0,0"
+                                                VerticalAlignment="Bottom"
+                                                Foreground="{TemplateBinding Foreground}"
+                                                Icon="{Binding RelativeSource={RelativeSource TemplatedParent}, Path=(pcontrols:Material.Icon)}" />
+                                        </Viewbox>
+
+                                        <ContentPresenter
+                                            Name="PART_Content"
+                                            Grid.Row="1"
+                                            Margin="2"
+                                            HorizontalAlignment="Center"
+                                            VerticalAlignment="Top" />
+                                    </Grid>
+                                </pcontrols:RippleEffectDecorator>
+                            </Border>
+                        </Grid>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="Border" Property="Background" Value="#48606a" />
+                            </Trigger>
+                            <Trigger Property="IsChecked" Value="True">
+                                <Setter TargetName="Border" Property="Background" Value="DodgerBlue" />
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter TargetName="Border" Property="Opacity" Value=".4" />
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </UserControl.Resources>
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="1*" />
+            <ColumnDefinition Width="8*" />
+            <ColumnDefinition Width="1*" />
+        </Grid.ColumnDefinitions>
+        <UniformGrid
+            Grid.Column="1"
+            MaxHeight="{Binding RelativeSource={RelativeSource Self}, Path=ActualWidth}"
+            Margin="30,0"
+            HorizontalAlignment="Stretch"
+            Columns="3">
+
+
+            <Button
+                Name="StopBtn"
+                Grid.Column="1"
+                Margin="5,5,5,2"
+                Padding="20"
+                pcontrols:Material.Icon="power_settings_new"
+                Command="{Binding StopCommand}"
+                Content="Stop"
+                IsEnabled="{Binding ElementName=Main, Path=PowerButtonEnabled}">
+                <Button.Resources>
+                    <Style TargetType="{x:Type Border}">
+                        <Setter Property="CornerRadius" Value="15 15 15 15" />
+                    </Style>
+                </Button.Resources>
+            </Button>
+            <Button
+                Grid.Column="1"
+                Margin="5,5,5,2"
+                Padding="20"
+                pcontrols:Material.Icon="volume_up"
+                Command="{Binding VolUpCommand}"
+                Content="Vol Up">
+                <Button.Resources>
+                    <Style TargetType="{x:Type Border}">
+                        <Setter Property="CornerRadius" Value="15 15 0 0" />
+                    </Style>
+                </Button.Resources>
+            </Button>
+            <Button
+                Grid.Column="2"
+                Margin="5,5,5,2"
+                Padding="20"
+                pcontrols:Material.Icon="add"
+                Command="{Binding ChannelUpCommand}"
+                Content="Ch Up">
+                <Button.Resources>
+                    <Style TargetType="{x:Type Border}">
+                        <Setter Property="CornerRadius" Value="15 15 0 0" />
+                    </Style>
+                </Button.Resources>
+            </Button>
+
+            <Button
+                Name="CastButton"
+                Grid.Row="2"
+                Grid.Column="0"
+                Padding="20"
+                pcontrols:Material.Icon="screen_share"
+                Command="{Binding ScreencastCommand}"
+                Content="Cast to TV">
+                <Button.Resources>
+                    <Style TargetType="{x:Type Border}">
+                        <Setter Property="CornerRadius" Value="15" />
+                    </Style>
+                </Button.Resources>
+            </Button>
+
+
+            <Button
+                Grid.Row="1"
+                Grid.Column="1"
+                Margin="5,2,5,5"
+                Padding="20"
+                pcontrols:Material.Icon="volume_down"
+                Command="{Binding VolDownCommand}"
+                Content="Vol Dwn">
+                <Button.Resources>
+                    <Style TargetType="{x:Type Border}">
+                        <Setter Property="CornerRadius" Value="0 0 15 15" />
+                    </Style>
+                </Button.Resources>
+            </Button>
+            <Button
+                Grid.Row="1"
+                Grid.Column="2"
+                Margin="5,2,5,5"
+                Padding="20"
+                pcontrols:Material.Icon="remove"
+                Command="{Binding ChannelDownCommand}"
+                Content="Ch Dwn">
+                <Button.Resources>
+                    <Style TargetType="{x:Type Border}">
+                        <Setter Property="CornerRadius" Value="0 0 15 15" />
+                    </Style>
+                </Button.Resources>
+            </Button>
+
+            <ToggleButton
+                Name="CaptionsButton"
+                pcontrols:Material.Icon="closed_caption"
+                Content="Captions"
+                IsChecked="{Binding CaptionsEnabled}"
+                IsEnabled="{Binding HasCaptions}">
+                <ToggleButton.Resources>
+                    <Style TargetType="{x:Type Border}">
+                        <Setter Property="CornerRadius" Value="9" />
+                    </Style>
+                </ToggleButton.Resources>
+            </ToggleButton>
+            <Button
+                Name="MuteBtn"
+                Grid.Row="1"
+                Grid.Column="0"
+                Padding="20"
+                pcontrols:Material.Icon="volume_off"
+                Command="{Binding MuteCommand}"
+                Content="{multilinguality:Translate 'Mute',
+                                                    'Television'}">
+                <Button.Resources>
+                    <Style TargetType="{x:Type Border}">
+                        <Setter Property="CornerRadius" Value="15" />
+                    </Style>
+                    <Style BasedOn="{StaticResource {x:Type Button}}" TargetType="Button">
+                        <Style.Triggers>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter Property="Visibility" Value="Collapsed" />
+                            </Trigger>
+                        </Style.Triggers>
+                    </Style>
+                </Button.Resources>
+            </Button>
+            <Button
+                Grid.Row="1"
+                Grid.Column="0"
+                Padding="20"
+                pcontrols:Material.Icon="volume_off"
+                Background="{DynamicResource ColorError}"
+                Command="{Binding UnmuteCommand}"
+                Content="{multilinguality:Translate 'Unmute',
+                                                    'Television'}">
+                <Button.Resources>
+                    <Style TargetType="{x:Type Border}">
+                        <Setter Property="CornerRadius" Value="15" />
+                    </Style>
+                    <Style BasedOn="{StaticResource {x:Type Button}}" TargetType="Button">
+                        <Style.Triggers>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter Property="Visibility" Value="Collapsed" />
+                            </Trigger>
+                        </Style.Triggers>
+                    </Style>
+                </Button.Resources>
+            </Button>
+
+        </UniformGrid>
+    </Grid>
+</UserControl>
