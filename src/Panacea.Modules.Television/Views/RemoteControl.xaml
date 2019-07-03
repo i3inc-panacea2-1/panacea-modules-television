@@ -184,7 +184,7 @@
                 Grid.Column="0"
                 Padding="20"
                 pcontrols:Material.Icon="screen_share"
-                Command="{Binding ScreencastCommand}"
+                Command="{Binding ReturnLocalCommand}"
                 Content="Cast to TV">
                 <Button.Resources>
                     <Style TargetType="{x:Type Border}">

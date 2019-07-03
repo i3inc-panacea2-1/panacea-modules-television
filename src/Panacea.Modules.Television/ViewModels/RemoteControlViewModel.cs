@@ -20,6 +20,10 @@ namespace Panacea.Modules.Television.ViewModels
         private readonly PanaceaServices _core;
         public event EventHandler Disconnected;
         public event EventHandler Stopped;
+        public event EventHandler ChannelUp;
+        public event EventHandler ChannelDown;
+        public event EventHandler ReturnLocal;
+
         public RemoteControlViewModel(PanaceaServices core)
         {
 
@@ -84,9 +88,25 @@ namespace Panacea.Modules.Television.ViewModels
                     screencast.SetVolume(_lastVolume);
                 }
             },
-           args => Volume == 0);
+            args => Volume == 0);
+
+            ChannelUpCommand = new RelayCommand(args =>
+            {
+                ChannelUp?.Invoke(this, null);
+            });
+            ChannelDownCommand = new RelayCommand(args =>
+            {
+                ChannelDown?.Invoke(this, null);
+            });
+            ReturnLocalCommand = new RelayCommand(args =>
+            {
+                ReturnLocal?.Invoke(this, null);
+            });
         }
         int _lastVolume;
+
+        public List<MediaItem> Channels { get; set; }
+
         private void Screencast2_VolumeChanged(object sender, EventArgs e)
         {
             if (_core.TryGetScreenCast(out IScreenCastPlayer screencast2))
@@ -145,10 +165,16 @@ namespace Panacea.Modules.Television.ViewModels
 
         public RelayCommand VolDownCommand { get; }
 
+        public RelayCommand ChannelUpCommand { get; set; }
+
+        public RelayCommand ChannelDownCommand { get; set; }
+
         public RelayCommand MuteCommand { get; }
 
         public RelayCommand UnmuteCommand { get; }
 
         public RelayCommand StopCommand { get; }
+
+        public RelayCommand ReturnLocalCommand { get; }
     }
 }

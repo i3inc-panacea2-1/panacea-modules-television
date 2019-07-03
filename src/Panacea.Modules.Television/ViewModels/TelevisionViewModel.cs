@@ -125,10 +125,18 @@ namespace Panacea.Modules.Television.ViewModels
                                 _remote = new RemoteControlViewModel(_core);
                                 _remote.Disconnected += _remote_Disconnected;
                                 _remote.Stopped += _remote_Stopped;
+                                _remote.ChannelUpCommand = ChannelUpCommand;
+                                _remote.ChannelDownCommand = ChannelDownCommand;
+                                _remote.ReturnLocal += _remote_ReturnLocal;
+                            }
+                            if (!IsScreencasted)
+                            {
+                                ui.Notify(_remote);
                             }
                             IsScreencasted = true;
                             _response?.Stop();
-                            ui.Notify(_remote);
+                           
+                            
                             _remote.Play(_currentChannel);
                         }
                     }
@@ -144,26 +152,31 @@ namespace Panacea.Modules.Television.ViewModels
                 }
                 return false;
             });
-          
-    }
 
-        private void _remote_Stopped(object sender, EventArgs e)
-        {
-            IsScreencasted = false;
-            _currentChannel = SelectedChannel = null;
-            if (_core.TryGetUiManager(out IUiManager ui))
-            {
-                ui.Refrain(_remote);
-            }
         }
 
-        private void _remote_Disconnected(object sender, EventArgs e)
+        private void _remote_ReturnLocal(object sender, EventArgs e)
         {
             IsScreencasted = false;
             if(_core.TryGetUiManager(out IUiManager ui))
             {
                 ui.Refrain(_remote);
+                var c = SelectedChannel;
+                SelectedChannel = null;
+                SelectedChannel = c;
             }
+        }
+
+        private void _remote_Stopped(object sender, EventArgs e)
+        {
+            _currentChannel = SelectedChannel = null;
+            
+        }
+
+        private void _remote_Disconnected(object sender, EventArgs e)
+        {
+            _currentChannel = SelectedChannel = null;
+           
         }
 
         int RoundBy5Down(int v)
@@ -314,44 +327,39 @@ namespace Panacea.Modules.Television.ViewModels
         {
             if (c == null) return;
             if (c == _currentChannel) return;
-            try
+
+
+            if (c.Id == _defaultChannel?.Id)
+            {
+                try
+                {
+                    //_webSocket.PopularNotify("Television", "Channel", c.Id);
+                }
+                catch
+                {
+                    //ignore
+                }
+                PlayChannel(c, null);
+                return;
+            }
+            else
             {
 
-                if (c.Id == _defaultChannel?.Id)
+                if (_core.TryGetBilling(out IBillingManager billing))
                 {
-                    try
+                    Application.Current.Dispatcher.BeginInvoke(new Action(() =>
+                    {
+                        SelectedChannel = _currentChannel;
+                    }), DispatcherPriority.Send);
+                    var serv = await billing.GetOrRequestServiceForItemAsync("Television", "Television", c);
+                    if (serv != null)
                     {
                         //_webSocket.PopularNotify("Television", "Channel", c.Id);
+                        PlayChannel(c, serv);
                     }
-                    catch
-                    {
-                        //ignore
-                    }
-                    PlayChannel(c, null);
-                    return;
                 }
-                else
-                {
+            }
 
-                    if (_core.TryGetBilling(out IBillingManager billing))
-                    {
-                        Application.Current.Dispatcher.BeginInvoke(new Action(() =>
-                        {
-                            SelectedChannel = _currentChannel;
-                        }), DispatcherPriority.Send);
-                        var serv = await billing.GetOrRequestServiceForItemAsync("Television", "Television", c);
-                        if (serv != null)
-                        {
-                            //_webSocket.PopularNotify("Television", "Channel", c.Id);
-                            PlayChannel(c, serv);
-                        }
-                    }
-                }
-            }
-            catch
-            {
-                //ignore
-            }
             return;
         }
 
