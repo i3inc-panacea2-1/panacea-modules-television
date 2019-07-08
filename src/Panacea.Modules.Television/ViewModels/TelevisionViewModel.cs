@@ -19,6 +19,7 @@ using Panacea.Modularity.ScreenCast;
 using Panacea.Modularity.TerminalPairing;
 using Panacea.Modules.Television.Views;
 using Panacea.Modules.Television.Models;
+using System.Windows.Input;
 
 namespace Panacea.Modules.Television.ViewModels
 {
@@ -49,6 +50,12 @@ namespace Panacea.Modules.Television.ViewModels
                 {
                     _response?.Next();
                 }
+            },
+            args =>
+            {
+                if (_currentChannel == null) return false;
+                var index = Channels.IndexOf(_currentChannel);
+                return index < Channels.Count - 1;
             });
             ChannelDownCommand = new RelayCommand(args =>
             {
@@ -56,6 +63,12 @@ namespace Panacea.Modules.Television.ViewModels
                 {
                     _response?.Previous();
                 }
+            },
+            args =>
+            {
+                if (_currentChannel == null) return false;
+                var index = Channels.IndexOf(_currentChannel);
+                return index > 0;
             });
             MuteCommand = new RelayCommand(args =>
             {
@@ -135,8 +148,8 @@ namespace Panacea.Modules.Television.ViewModels
                             }
                             IsScreencasted = true;
                             _response?.Stop();
-                           
-                            
+
+
                             _remote.Play(_currentChannel);
                         }
                     }
@@ -158,7 +171,7 @@ namespace Panacea.Modules.Television.ViewModels
         private void _remote_ReturnLocal(object sender, EventArgs e)
         {
             IsScreencasted = false;
-            if(_core.TryGetUiManager(out IUiManager ui))
+            if (_core.TryGetUiManager(out IUiManager ui))
             {
                 ui.Refrain(_remote);
                 var c = SelectedChannel;
@@ -170,13 +183,13 @@ namespace Panacea.Modules.Television.ViewModels
         private void _remote_Stopped(object sender, EventArgs e)
         {
             _currentChannel = SelectedChannel = null;
-            
+
         }
 
         private void _remote_Disconnected(object sender, EventArgs e)
         {
             _currentChannel = SelectedChannel = null;
-           
+
         }
 
         int RoundBy5Down(int v)
@@ -251,15 +264,14 @@ namespace Panacea.Modules.Television.ViewModels
 
         public override async void Activate()
         {
-            if (Channels == null)
+
+            if (_core.TryGetUiManager(out IUiManager ui))
             {
-                if (_core.TryGetUiManager(out IUiManager ui))
+                ui.PreviewKeyDown += Ui_PreviewKeyDown;
+                await ui.DoWhileBusy(async () =>
                 {
-                    await ui.DoWhileBusy(async () =>
-                    {
-                        await LoadChannels();
-                    });
-                }
+                    await LoadChannels();
+                });
             }
 
             if (_defaultChannel != null)
@@ -267,9 +279,26 @@ namespace Panacea.Modules.Television.ViewModels
                 SelectedChannel = Channels.First(c => c.Id == _defaultChannel.Id);
             }
         }
+
+        private void Ui_PreviewKeyDown(object sender, System.Windows.Input.KeyEventArgs e)
+        {
+            if (!Keyboard.IsKeyDown(Key.LeftCtrl)) return;
+            if (e.Key == Key.D1)
+            {
+                Previous();
+            }
+            else if (e.Key == Key.D2)
+            {
+                Next();
+            }
+        }
+
         public override void Deactivate()
         {
-
+            if (_core.TryGetUiManager(out IUiManager ui))
+            {
+                ui.PreviewKeyDown -= Ui_PreviewKeyDown;
+            }
         }
 
         public void Next()
@@ -339,7 +368,7 @@ namespace Panacea.Modules.Television.ViewModels
                 {
                     //ignore
                 }
-                PlayChannel(c, null);
+                PlayChannel(c);
                 return;
             }
             else
@@ -351,11 +380,9 @@ namespace Panacea.Modules.Television.ViewModels
                     {
                         SelectedChannel = _currentChannel;
                     }), DispatcherPriority.Send);
-                    var serv = await billing.GetOrRequestServiceForItemAsync("Television", "Television", c);
-                    if (serv != null)
+                    if (await billing.RequestServiceAndConsumeItemAsync("Television requires service.", "Television", c))
                     {
-                        //_webSocket.PopularNotify("Television", "Channel", c.Id);
-                        PlayChannel(c, serv);
+                        PlayChannel(c);
                     }
                 }
             }
@@ -366,7 +393,7 @@ namespace Panacea.Modules.Television.ViewModels
         MediaItem _currentChannel;
         private readonly PanaceaServices _core;
 
-        private void PlayChannel(MediaItem c, Service serv)
+        private void PlayChannel(MediaItem c)
         {
             HasCaptions = false;
             if (!IsScreencasted)
@@ -424,12 +451,18 @@ namespace Panacea.Modules.Television.ViewModels
                 }
                 ScreencastCommand.Execute(null);
             }
+            ChannelDownCommand.RaiseCanExecuteChanged();
+            ChannelUpCommand.RaiseCanExecuteChanged();
 
         }
+
+
 
         private void _response_HasSubtitlesChanged(object sender, bool e)
         {
             HasCaptions = e;
+            if (e)
+                _response?.SetSubtitles(_captionsEnabled);
         }
 
         private void _response_Error(object sender, Exception e)
