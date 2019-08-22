@@ -423,6 +423,7 @@ namespace Panacea.Modules.Television.ViewModels
                         _response.Ended -= _response_Ended;
                         _response.Error -= _response_Error;
                     }
+                    ChannelListEnabled = false;
                     _response = _currentResponse = player.Play(
                         new MediaRequest(c)
                         {
@@ -432,6 +433,7 @@ namespace Panacea.Modules.Television.ViewModels
                             ShowControls = false,
                             MediaTraverser = this
                         });
+                    _response.Opening += _response_Opening;
                     _response.HasSubtitlesChanged += _response_HasSubtitlesChanged;
                     _response.Stopped += _response_Stopped;
                     _response.Ended += _response_Ended;
@@ -456,7 +458,10 @@ namespace Panacea.Modules.Television.ViewModels
 
         }
 
-
+        private void _response_Opening(object sender, EventArgs e)
+        {
+            ChannelListEnabled = true;
+        }
 
         private void _response_HasSubtitlesChanged(object sender, bool e)
         {
@@ -468,12 +473,14 @@ namespace Panacea.Modules.Television.ViewModels
         private void _response_Error(object sender, Exception e)
         {
             if (IsScreencasted) return;
+            ChannelListEnabled = true;
             _currentChannel = SelectedChannel = null;
         }
 
         private void _response_Ended(object sender, EventArgs e)
         {
             if (IsScreencasted) return;
+            ChannelListEnabled = true;
             _currentChannel = SelectedChannel = null;
 
         }
@@ -485,6 +492,17 @@ namespace Panacea.Modules.Television.ViewModels
         }
 
         IMediaResponse _response;
+
+        bool _channelListEnabled;
+        public bool ChannelListEnabled
+        {
+            get => _channelListEnabled;
+            set
+            {
+                _channelListEnabled = value;
+                OnPropertyChanged();
+            }
+        }
 
         public RelayCommand FullscreenCommand { get; }
 
