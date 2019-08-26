@@ -53,6 +53,7 @@ namespace Panacea.Modules.Television.ViewModels
             },
             args =>
             {
+                if (!ChannelListEnabled) return false;
                 if (_currentChannel == null) return false;
                 var index = Channels.IndexOf(_currentChannel);
                 return index < Channels.Count - 1;
@@ -66,6 +67,7 @@ namespace Panacea.Modules.Television.ViewModels
             },
             args =>
             {
+                if (!ChannelListEnabled) return false;
                 if (_currentChannel == null) return false;
                 var index = Channels.IndexOf(_currentChannel);
                 return index > 0;
@@ -424,6 +426,8 @@ namespace Panacea.Modules.Television.ViewModels
                         _response.Error -= _response_Error;
                     }
                     ChannelListEnabled = false;
+                    ChannelUpCommand?.RaiseCanExecuteChanged();
+                    ChannelDownCommand?.RaiseCanExecuteChanged();
                     _response = _currentResponse = player.Play(
                         new MediaRequest(c)
                         {
@@ -461,6 +465,8 @@ namespace Panacea.Modules.Television.ViewModels
         private void _response_Opening(object sender, EventArgs e)
         {
             ChannelListEnabled = true;
+            ChannelUpCommand?.RaiseCanExecuteChanged();
+            ChannelDownCommand?.RaiseCanExecuteChanged();
         }
 
         private void _response_HasSubtitlesChanged(object sender, bool e)
@@ -474,6 +480,8 @@ namespace Panacea.Modules.Television.ViewModels
         {
             if (IsScreencasted) return;
             ChannelListEnabled = true;
+            ChannelUpCommand?.RaiseCanExecuteChanged();
+            ChannelDownCommand?.RaiseCanExecuteChanged();
             _currentChannel = SelectedChannel = null;
         }
 
@@ -481,6 +489,8 @@ namespace Panacea.Modules.Television.ViewModels
         {
             if (IsScreencasted) return;
             ChannelListEnabled = true;
+            ChannelUpCommand?.RaiseCanExecuteChanged();
+            ChannelDownCommand?.RaiseCanExecuteChanged();
             _currentChannel = SelectedChannel = null;
 
         }
@@ -488,6 +498,9 @@ namespace Panacea.Modules.Television.ViewModels
         private void _response_Stopped(object sender, EventArgs e)
         {
             if (IsScreencasted) return;
+            ChannelListEnabled = true;
+            ChannelUpCommand?.RaiseCanExecuteChanged();
+            ChannelDownCommand?.RaiseCanExecuteChanged();
             _currentChannel = SelectedChannel = null;
         }
 
