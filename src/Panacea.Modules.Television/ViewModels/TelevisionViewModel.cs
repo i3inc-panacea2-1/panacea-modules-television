@@ -152,6 +152,7 @@ namespace Panacea.Modules.Television.ViewModels
                             _response?.Stop();
 
                             SelectedChannel = _currentChannel;
+                            ChannelListEnabled = true;
                             _remote.Play(_currentChannel);
                         }
                     }
