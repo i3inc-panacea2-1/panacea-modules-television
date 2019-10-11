@@ -185,7 +185,7 @@
                 Padding="20"
                 pcontrols:Material.Icon="screen_share"
                 Command="{Binding ReturnLocalCommand}"
-                Content="Cast to TV">
+                Content="Cast Back">
                 <Button.Resources>
                     <Style TargetType="{x:Type Border}">
                         <Setter Property="CornerRadius" Value="15" />
