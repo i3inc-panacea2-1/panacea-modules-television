@@ -151,7 +151,7 @@ namespace Panacea.Modules.Television.ViewModels
                             IsScreencasted = true;
                             _response?.Stop();
 
-
+                            SelectedChannel = _currentChannel;
                             _remote.Play(_currentChannel);
                         }
                     }
@@ -173,6 +173,12 @@ namespace Panacea.Modules.Television.ViewModels
         private void _remote_ReturnLocal(object sender, EventArgs e)
         {
             IsScreencasted = false;
+
+            if (_core.TryGetScreenCast(out IScreenCastPlayer screencast))
+            {
+                screencast.Stop();
+            }
+
             if (_core.TryGetUiManager(out IUiManager ui))
             {
                 ui.Refrain(_remote);
@@ -184,12 +190,15 @@ namespace Panacea.Modules.Television.ViewModels
 
         private void _remote_Stopped(object sender, EventArgs e)
         {
+            if (!IsScreencasted) return;
             _currentChannel = SelectedChannel = null;
+
 
         }
 
         private void _remote_Disconnected(object sender, EventArgs e)
         {
+            if (!IsScreencasted) return;
             _currentChannel = SelectedChannel = null;
 
         }
@@ -259,6 +268,7 @@ namespace Panacea.Modules.Television.ViewModels
                 if (_selectedChannel == value) return;
                 _selectedChannel = value;
                 OnPropertyChanged();
+                ScreencastCommand.RaiseCanExecuteChanged();
                 SetChannel(value);
             }
         }
@@ -357,9 +367,7 @@ namespace Panacea.Modules.Television.ViewModels
         private async Task SetChannel(MediaItem c)
         {
             if (c == null) return;
-            if (c == _currentChannel) return;
-
-
+            
             if (c.Id == _defaultChannel?.Id)
             {
                 try
