@@ -287,7 +287,7 @@ namespace Panacea.Modules.Television.ViewModels
                 });
             }
 
-            if (_defaultChannel != null)
+            if (_defaultChannel != null && SelectedChannel ==null)
             {
                 SelectedChannel = Channels.First(c => c.Id == _defaultChannel.Id);
             }
