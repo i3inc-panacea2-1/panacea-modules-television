@@ -523,6 +523,8 @@ namespace Panacea.Modules.Television.ViewModels
             {
                 _channelListEnabled = value;
                 OnPropertyChanged();
+                ChannelDownCommand?.RaiseCanExecuteChanged();
+                ChannelUpCommand?.RaiseCanExecuteChanged();
             }
         }
 

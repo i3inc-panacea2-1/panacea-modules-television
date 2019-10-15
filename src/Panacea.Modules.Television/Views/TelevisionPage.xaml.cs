@@ -25,8 +25,9 @@ namespace Panacea.Modules.Television.Views
             InitializeComponent();
         }
 
-        private void ListBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        private async void ListBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
+            await Task.Delay(500);
             (sender as ListBox).ScrollIntoView((sender as ListBox).SelectedItem);
         }
     }
