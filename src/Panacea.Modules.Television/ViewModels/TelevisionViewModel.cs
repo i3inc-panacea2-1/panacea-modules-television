@@ -123,7 +123,7 @@ namespace Panacea.Modules.Television.ViewModels
             });
             StopCommand = new RelayCommand(args =>
             {
-                _response.Stop();
+                _response?.Stop();
             });
             ScreencastCommand = new RelayCommand(args =>
             {
@@ -515,7 +515,7 @@ namespace Panacea.Modules.Television.ViewModels
 
         IMediaResponse _response;
 
-        bool _channelListEnabled;
+        bool _channelListEnabled = true;
         public bool ChannelListEnabled
         {
             get => _channelListEnabled;

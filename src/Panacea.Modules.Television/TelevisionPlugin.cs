@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Panacea.Modules.Television
@@ -24,6 +25,8 @@ namespace Panacea.Modules.Television
         TelevisionViewModel _page;
         public void Call()
         {
+            ThreadPool.GetMaxThreads(out int a, out int b);
+            _core.Logger.Debug(this, a + " " + b);
             try
             {
                 if (_core.TryGetUiManager(out IUiManager ui))
